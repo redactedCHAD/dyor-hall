@@ -1,0 +1,3200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zestwell — Citrus Season</title>
+    <meta name="description" content="A first-person 3D curved gallery passage and print shop for Zestwell's Citrus Season collection." />
+    <meta property="og:title" content="Zestwell — Citrus Season" />
+    <meta property="og:description" content="A first-person 3D curved gallery passage and print shop for Zestwell's Citrus Season collection." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
+      }
+    </script>
+    <style>
+      @font-face {
+        font-family: "Oswald";
+        font-style: normal;
+        font-weight: 200 700;
+        font-display: swap;
+        src: url("/fonts/oswald.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Newsreader";
+        font-style: normal;
+        font-weight: 200 800;
+        font-display: swap;
+        src: url("/fonts/newsreader-roman.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Newsreader";
+        font-style: italic;
+        font-weight: 400;
+        font-display: swap;
+        src: url("/fonts/newsreader-italic-400.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "DM Mono";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url("/fonts/dm-mono-400.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "DM Mono";
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url("/fonts/dm-mono-500.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+
+      :root {
+        --wall: #FFF9EC;
+        --floor: #F8E7D2;
+        --ink: #3A3550;
+        --ink-60: rgba(58, 53, 80, 0.6);
+        --ink-35: rgba(58, 53, 80, 0.35);
+        --ink-15: rgba(58, 53, 80, 0.15);
+        --lemon: #FBE46D;
+        --blush: #F7D2D1;
+        --chip-on: #FCEB93;
+        --drawer: #F9E3DF;
+        --page: #FFF9EF;
+
+        --serif: "Newsreader", Georgia, serif;
+        --mono: "DM Mono", ui-monospace, monospace;
+        --cond: "Oswald", "Arial Narrow", sans-serif;
+
+        --u: min(calc(100vw / 1440), calc(100vh / 900));
+        --w: calc(100vw / 1440);
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: var(--wall);
+        color: var(--ink);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      button {
+        background: none;
+        border: 0;
+        padding: 0;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+
+      button:focus-visible, a:focus-visible, input:focus-visible {
+        outline: 1.5px solid var(--ink);
+        outline-offset: 2px;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* 1. Nav */
+      header.nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: calc(58 * var(--u));
+        display: flex;
+        align-items: center;
+        padding: 0 calc(27 * var(--u));
+        z-index: 30;
+        background: transparent;
+        border-bottom: 1px solid transparent;
+        transition: background 0.3s ease, border-color 0.3s ease;
+      }
+
+      body.overlay-open header.nav {
+        background: var(--page);
+        border-bottom-color: var(--ink-15);
+      }
+
+      .nav-logo {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: calc(21 * var(--u));
+        letter-spacing: -0.01em;
+        margin-right: calc(36 * var(--u));
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: 24px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: calc(22 * var(--u));
+      }
+
+      .nav-links a {
+        font-family: var(--serif);
+        font-size: max(11px, calc(13.5 * var(--u)));
+        opacity: 0.85;
+        min-height: 24px;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        transition: opacity 0.2s ease;
+      }
+
+      .nav-links a:hover, .nav-links a.active {
+        opacity: 1;
+      }
+
+      .nav-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: calc(14 * var(--u));
+      }
+
+      .search-pill {
+        width: calc(159 * var(--u));
+        height: max(24px, calc(27 * var(--u)));
+        border: 1px solid var(--ink-35);
+        border-radius: 99px;
+        padding: 0 calc(6 * var(--u)) 0 calc(11 * var(--u));
+        display: inline-flex;
+        align-items: center;
+        gap: calc(6 * var(--u));
+        color: var(--ink-60);
+        font-family: var(--serif);
+        font-size: max(11px, calc(12 * var(--u)));
+        white-space: nowrap;
+      }
+
+      .search-pill svg {
+        width: calc(12 * var(--u));
+        height: calc(12 * var(--u));
+        min-width: 12px;
+        min-height: 12px;
+        margin-left: auto;
+        color: var(--ink-60);
+      }
+
+      .search-pill kbd {
+        font-family: var(--mono);
+        font-size: max(11px, calc(9 * var(--u)));
+        line-height: 1.1;
+        border: 1px solid var(--ink-15);
+        border-radius: 4px;
+        color: var(--ink-35);
+        padding: 1px calc(4 * var(--u));
+      }
+
+      .currency-pill {
+        height: max(24px, calc(27 * var(--u)));
+        border: 1px solid var(--ink-35);
+        border-radius: 99px;
+        padding: 0 calc(10 * var(--u));
+        display: inline-flex;
+        align-items: center;
+        gap: calc(5 * var(--u));
+        font-family: var(--mono);
+        font-size: max(11px, calc(10.5 * var(--u)));
+        white-space: nowrap;
+      }
+
+      .currency-pill svg {
+        width: 8px;
+        height: 8px;
+      }
+
+      .nav-icon-btn {
+        position: relative;
+        width: max(24px, calc(26 * var(--u)));
+        height: max(24px, calc(26 * var(--u)));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .nav-icon-btn svg {
+        width: calc(18 * var(--u));
+        height: calc(18 * var(--u));
+        min-width: 16px;
+        min-height: 16px;
+      }
+
+      .bag-badge {
+        position: absolute;
+        top: -2px;
+        right: -4px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 99px;
+        background: var(--ink);
+        color: var(--wall);
+        font-family: var(--mono);
+        font-size: 10px;
+        line-height: 16px;
+        text-align: center;
+        display: none;
+      }
+
+      .bag-badge.visible {
+        display: block;
+      }
+
+      /* Intro nav fade */
+      body.intro-pending header.nav > * {
+        opacity: 0;
+      }
+
+      body.intro-running header.nav > * {
+        animation: navFadeIn 1000ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+      }
+
+      @keyframes navFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      /* 2. Gallery */
+      main#gallery {
+        position: fixed;
+        inset: 0;
+        touch-action: none;
+        cursor: grab;
+        background: var(--wall);
+      }
+
+      main#gallery.grabbing {
+        cursor: grabbing;
+      }
+
+      main#gallery.pointing {
+        cursor: pointer;
+      }
+
+      main#gallery canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+
+      #veil {
+        position: fixed;
+        inset: 0;
+        background: var(--wall);
+        z-index: 25;
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 900ms ease-out;
+      }
+
+      #veil.gone {
+        opacity: 0;
+      }
+
+      /* 3. Gallery UI */
+      .gui {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        pointer-events: none;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .gui.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .gui button, .gui a, .gui .toggle {
+        pointer-events: auto;
+      }
+
+      .gui.hidden button, .gui.hidden a, .gui.hidden .toggle {
+        pointer-events: none;
+      }
+
+      .arrows {
+        position: absolute;
+        left: calc(27 * var(--u));
+        top: calc(262 * var(--u));
+        display: flex;
+        flex-direction: column;
+        gap: calc(10 * var(--u));
+      }
+
+      .arrow-btn {
+        width: calc(50 * var(--u));
+        height: calc(50 * var(--u));
+        min-width: 24px;
+        min-height: 24px;
+        border: 1.5px solid var(--ink);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        transition: background 0.25s ease, color 0.25s ease;
+      }
+
+      .arrow-btn:hover {
+        background: var(--ink);
+        color: var(--wall);
+      }
+
+      .arrow-btn svg {
+        width: calc(20 * var(--u));
+        height: calc(20 * var(--u));
+      }
+
+      .hint {
+        position: absolute;
+        right: calc(27 * var(--u));
+        bottom: calc(229 * var(--u));
+        text-align: right;
+        font-family: var(--mono);
+        font-size: max(11px, calc(10 * var(--u)));
+        letter-spacing: 0.12em;
+        line-height: 1.65;
+        text-transform: uppercase;
+      }
+
+      .toggle {
+        position: absolute;
+        right: calc(29 * var(--u));
+        bottom: calc(174 * var(--u));
+        display: inline-flex;
+        padding: calc(2 * var(--u));
+        gap: calc(2 * var(--u));
+        border: 1px solid var(--ink-35);
+        border-radius: 99px;
+        background: rgba(255, 249, 236, 0.55);
+      }
+
+      .toggle-btn {
+        font-family: var(--mono);
+        font-size: max(11px, calc(9.5 * var(--u)));
+        letter-spacing: 0.12em;
+        height: max(24px, calc(22 * var(--u)));
+        padding: 0 calc(14 * var(--u));
+        border-radius: 99px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+
+      .toggle-btn.active {
+        background: var(--ink);
+        color: var(--wall);
+      }
+
+      .caption {
+        position: absolute;
+        left: calc(25 * var(--u));
+        bottom: calc(30 * var(--u));
+      }
+
+      .kicker {
+        font-family: var(--mono);
+        font-size: max(11px, calc(11.5 * var(--u)));
+        letter-spacing: 0.14em;
+        width: max-content;
+        margin: 0 0 calc(10 * var(--u)) calc(3 * var(--u));
+        text-transform: uppercase;
+      }
+
+      .headline {
+        margin: 0;
+        font-family: var(--cond);
+        font-weight: 600;
+        font-size: calc(170 * var(--u));
+        line-height: 0.82;
+        letter-spacing: 0.005em;
+        white-space: nowrap;
+        transform: scaleX(0.855);
+        transform-origin: bottom left;
+        text-transform: uppercase;
+      }
+
+      .hl-word {
+        display: inline;
+      }
+
+      .enter-link {
+        position: absolute;
+        left: calc(946 * var(--u));
+        bottom: 0;
+        font-family: var(--mono);
+        font-size: max(11px, calc(11 * var(--u)));
+        letter-spacing: 0.12em;
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: calc(2 * var(--u));
+        margin-bottom: calc(9 * var(--u));
+        white-space: nowrap;
+        min-height: 24px;
+        display: inline-flex;
+        align-items: flex-end;
+        text-transform: uppercase;
+      }
+
+      /* Masked text lines */
+      .mask {
+        display: block;
+        overflow: hidden;
+      }
+
+      .mask-headline {
+        padding-top: 0.04em;
+        margin-top: -0.04em;
+        padding-bottom: 0.02em;
+        margin-bottom: -0.02em;
+      }
+
+      .mask-in {
+        display: block;
+      }
+
+      body.intro-pending .mask-in {
+        transform: translateY(105%);
+      }
+
+      body.intro-running .mask-in {
+        animation: riseIn 1000ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+      }
+
+      @keyframes riseIn {
+        from { transform: translateY(105%); }
+        to { transform: translateY(0); }
+      }
+
+      /* 4. Pill */
+      #open-pill {
+        position: fixed;
+        z-index: 22;
+        background: #1e1b2b;
+        color: #ffffff;
+        font-family: var(--mono);
+        font-size: max(11px, calc(10 * var(--u)));
+        letter-spacing: 0.14em;
+        padding: calc(7 * var(--u)) calc(13 * var(--u));
+        border-radius: 99px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        transition: opacity 0.12s ease;
+        white-space: nowrap;
+        text-transform: uppercase;
+      }
+
+      #open-pill.visible {
+        opacity: 1;
+      }
+
+      /* 5. Print Page */
+      section#page {
+        position: fixed;
+        inset: 0;
+        z-index: 15;
+        background: var(--page);
+        overflow-y: auto;
+        overflow-x: hidden;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      section#page.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .pdp-wrap {
+        padding-top: calc(96 * var(--w));
+        display: grid;
+        grid-template-columns: calc(712 * var(--w)) calc(638 * var(--w));
+      }
+
+      .pdp-left {
+        position: sticky;
+        top: calc(96 * var(--w));
+        padding-left: calc(184 * var(--w));
+        width: calc(544 * var(--w));
+        align-self: start;
+      }
+
+      #pdp-img {
+        width: calc(360 * var(--w));
+        aspect-ratio: 3 / 4.08;
+        box-shadow: 0 0 0 calc(10 * var(--w)) #F6EAD8, 0 calc(2 * var(--w)) calc(10 * var(--w)) calc(10 * var(--w)) rgba(58, 53, 80, 0.06);
+        opacity: 0;
+        background-color: #F6EAD8;
+      }
+
+      #pdp-img.ready {
+        opacity: 1;
+      }
+
+      .pdp-meta {
+        width: calc(360 * var(--w));
+        margin-top: calc(34 * var(--w));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: max(11px, calc(11 * var(--w)));
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+
+      .pdp-meta.visible {
+        opacity: 1;
+      }
+
+      .pdp-meta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: calc(6 * var(--w));
+        min-height: 24px;
+      }
+
+      .pdp-meta-btn svg {
+        width: calc(17 * var(--w));
+        height: calc(17 * var(--w));
+        min-width: 15px;
+        min-height: 15px;
+      }
+
+      .pdp-right {
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        padding-bottom: calc(24 * var(--w));
+      }
+
+      .pdp-right.visible {
+        opacity: 1;
+      }
+
+      .pdp-title {
+        margin: 0;
+        font-family: var(--cond);
+        font-weight: 600;
+        font-size: calc(46 * var(--w));
+        text-transform: uppercase;
+        line-height: 1;
+      }
+
+      .pdp-artist {
+        margin: calc(6 * var(--w)) 0 0;
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: max(11px, calc(19 * var(--w)));
+      }
+
+      .pdp-desc {
+        margin: calc(18 * var(--w)) 0 0;
+        font-family: var(--serif);
+        font-size: max(11px, calc(14.5 * var(--w)));
+        line-height: 1.55;
+        color: var(--ink-60);
+        max-width: calc(560 * var(--w));
+      }
+
+      .pdp-price {
+        margin: calc(20 * var(--w)) 0 0;
+        font-family: var(--mono);
+        font-size: max(11px, calc(15 * var(--w)));
+      }
+
+      .pdp-tax {
+        margin: calc(24 * var(--w)) 0 0;
+        font-family: var(--mono);
+        font-size: max(11px, calc(10 * var(--w)));
+        color: var(--ink-60);
+      }
+
+      .opt-groups {
+        margin-top: calc(26 * var(--w));
+        display: flex;
+        flex-direction: column;
+        gap: calc(21 * var(--w));
+      }
+
+      .opt-label {
+        font-family: var(--mono);
+        font-size: max(11px, calc(10 * var(--w)));
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: calc(9 * var(--w));
+      }
+
+      .opt-label span {
+        color: var(--ink-60);
+        text-transform: none;
+        letter-spacing: 0;
+        margin-left: calc(8 * var(--w));
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: calc(13 * var(--w));
+      }
+
+      .chip {
+        font-family: var(--mono);
+        font-size: max(11px, calc(10.5 * var(--w)));
+        min-height: max(28px, calc(32 * var(--w)));
+        padding: 0 calc(14 * var(--w));
+        border: 1px solid var(--ink-35);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+
+      .chip.on {
+        background: var(--chip-on);
+        border-color: var(--ink);
+      }
+
+      .frame-chip {
+        width: calc(121 * var(--w));
+        height: calc(126 * var(--w));
+        border: 1px solid var(--ink-15);
+        background: rgba(255, 255, 255, 0.35);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: calc(10 * var(--w));
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+
+      .frame-chip.on {
+        background: var(--chip-on);
+        border-color: var(--ink);
+      }
+
+      .frame-thumb {
+        width: calc(38 * var(--w));
+        aspect-ratio: 3 / 4.08;
+      }
+
+      .frame-thumb.classic {
+        box-shadow: 0 0 0 calc(4 * var(--w)) #C99A63;
+      }
+
+      .frame-thumb.canvas {
+        box-shadow: 0 0 0 calc(5 * var(--w)) #1d1b24;
+      }
+
+      .frame-chip-name {
+        font-family: var(--mono);
+        font-size: max(11px, calc(10 * var(--w)));
+      }
+
+      .buy-row {
+        margin-top: calc(42 * var(--w));
+        display: flex;
+        gap: calc(26 * var(--w));
+        align-items: stretch;
+      }
+
+      .qty-box {
+        width: calc(100 * var(--w));
+        height: calc(50 * var(--w));
+        border: 1px solid var(--ink-35);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 calc(8 * var(--w));
+        font-family: var(--mono);
+        font-size: max(11px, calc(13 * var(--w)));
+        flex-shrink: 0;
+      }
+
+      .qty-btn {
+        min-width: max(24px, calc(24 * var(--w)));
+        min-height: max(24px, calc(24 * var(--w)));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .add-btn {
+        flex: 1;
+        height: calc(50 * var(--w));
+        background: var(--ink);
+        color: var(--wall);
+        font-family: var(--cond);
+        font-weight: 500;
+        font-size: max(11px, calc(16 * var(--w)));
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        transition: background 0.2s ease;
+      }
+
+      .add-btn:hover {
+        background: #2a2640;
+      }
+
+      .accordions {
+        margin-top: calc(36 * var(--w));
+        border-top: 1px solid var(--ink-35);
+      }
+
+      .acc-row {
+        border-bottom: 1px solid var(--ink-35);
+      }
+
+      .acc-trig {
+        width: 100%;
+        min-height: max(32px, calc(40 * var(--w)));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--serif);
+        font-size: max(11px, calc(15 * var(--w)));
+        text-align: left;
+      }
+
+      .acc-plus {
+        font-family: var(--mono);
+        font-size: max(11px, calc(15 * var(--w)));
+        transition: transform 0.25s ease;
+        display: inline-block;
+      }
+
+      .acc-row.open .acc-plus {
+        transform: rotate(45deg);
+      }
+
+      .acc-body {
+        height: 0;
+        overflow: hidden;
+        transition: height 0.3s ease;
+      }
+
+      .acc-body-in {
+        padding-bottom: calc(16 * var(--w));
+        font-family: var(--serif);
+        font-size: max(11px, calc(14 * var(--w)));
+        line-height: 1.55;
+        color: var(--ink-60);
+      }
+
+      .collection-band {
+        margin-top: calc(70 * var(--w));
+        background: #FBF3E4;
+        padding: calc(36 * var(--w)) calc(48 * var(--w)) calc(80 * var(--w)) calc(48 * var(--w));
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+
+      .collection-band.visible {
+        opacity: 1;
+      }
+
+      .collection-head {
+        margin: 0 0 calc(28 * var(--w)) calc(-15 * var(--w));
+        font-family: var(--cond);
+        font-weight: 600;
+        font-size: calc(38 * var(--w));
+        text-transform: uppercase;
+        line-height: 1;
+      }
+
+      .collection-grid {
+        display: flex;
+        gap: calc(87 * var(--w));
+      }
+
+      .print-card {
+        width: calc(168 * var(--w));
+        flex-shrink: 0;
+        text-align: left;
+        display: block;
+      }
+
+      .print-card-img {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        box-shadow: 0 0 0 calc(7 * var(--w)) #F6EAD8;
+        transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+
+      .print-card:hover .print-card-img {
+        transform: translateY(calc(-4 * var(--w)));
+      }
+
+      .print-card-title {
+        margin: calc(16 * var(--w)) 0 0;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: max(11px, calc(14 * var(--w)));
+      }
+
+      .print-card-artist {
+        margin: calc(2 * var(--w)) 0 0;
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: max(11px, calc(13.5 * var(--w)));
+        color: var(--ink-60);
+      }
+
+      .print-card-price {
+        margin: calc(4 * var(--w)) 0 0;
+        font-family: var(--mono);
+        font-size: max(11px, calc(11 * var(--w)));
+      }
+
+      /* 6. List View */
+      section#list {
+        position: fixed;
+        inset: 0;
+        z-index: 14;
+        background: var(--page);
+        overflow-y: auto;
+        padding: calc(110 * var(--w)) calc(48 * var(--w)) calc(80 * var(--w));
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      section#list.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .list-head {
+        margin: 0 0 calc(32 * var(--w));
+        font-family: var(--cond);
+        font-weight: 600;
+        font-size: calc(38 * var(--w));
+        text-transform: uppercase;
+        line-height: 1;
+      }
+
+      .list-grid {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: calc(87 * var(--w));
+        row-gap: calc(46 * var(--w));
+      }
+
+      /* 7. Drawer */
+      .drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 38;
+        background: rgba(58, 53, 80, 0.16);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .drawer-backdrop.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      aside.drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: calc(387 * var(--w));
+        z-index: 40;
+        background: var(--drawer);
+        padding: calc(28 * var(--w)) calc(28 * var(--w)) calc(28 * var(--w)) calc(32 * var(--w));
+        display: flex;
+        flex-direction: column;
+        transform: translateX(101%);
+        transition: transform 0.45s cubic-bezier(0.1, 0.85, 0.2, 1);
+      }
+
+      aside.drawer.open {
+        transform: translateX(0);
+      }
+
+      .drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .drawer-title {
+        margin: 0;
+        font-family: var(--cond);
+        font-weight: 600;
+        font-size: calc(26 * var(--w));
+        text-transform: uppercase;
+      }
+
+      .drawer-close {
+        min-width: 24px;
+        min-height: 24px;
+        font-family: var(--mono);
+        font-size: 20px;
+        display: grid;
+        place-items: center;
+      }
+
+      .drawer-items {
+        flex: 1;
+        overflow-y: auto;
+        margin-top: calc(22 * var(--w));
+      }
+
+      .drawer-empty {
+        font-family: var(--mono);
+        font-size: max(11px, calc(11 * var(--w)));
+        letter-spacing: 0.1em;
+        text-align: center;
+        margin-top: calc(120 * var(--w));
+        color: var(--ink-60);
+      }
+
+      .bag-item {
+        display: flex;
+        gap: calc(16 * var(--w));
+        padding: calc(14 * var(--w)) 0;
+        border-bottom: 1px solid var(--ink-15);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .bag-item.entering {
+        opacity: 0;
+        transform: translateY(calc(6 * var(--w)));
+      }
+
+      .bag-thumb {
+        width: calc(66 * var(--w));
+        aspect-ratio: 3 / 4;
+        flex-shrink: 0;
+        box-shadow: 0 0 0 calc(3 * var(--w)) #F6EAD8;
+      }
+
+      .bag-item-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .bag-item-title {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: max(11px, calc(14 * var(--w)));
+      }
+
+      .bag-item-artist {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: max(11px, calc(13 * var(--w)));
+        color: var(--ink-60);
+      }
+
+      .bag-item-size {
+        margin-top: calc(4 * var(--w));
+        font-family: var(--mono);
+        font-size: max(11px, calc(11 * var(--w)));
+        color: var(--ink-60);
+      }
+
+      .bag-item-actions {
+        margin-top: auto;
+        padding-top: calc(10 * var(--w));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .bag-qty {
+        display: inline-flex;
+        align-items: center;
+        gap: calc(6 * var(--w));
+        border: 1px solid var(--ink-35);
+        padding: 0 calc(6 * var(--w));
+        font-family: var(--mono);
+        font-size: max(11px, calc(11 * var(--w)));
+      }
+
+      .bag-qty button {
+        min-width: max(24px, calc(24 * var(--w)));
+        min-height: max(24px, calc(24 * var(--w)));
+      }
+
+      .bag-trash {
+        min-width: 24px;
+        min-height: 24px;
+        display: grid;
+        place-items: center;
+        color: var(--ink-60);
+      }
+
+      .bag-trash:hover {
+        color: var(--ink);
+      }
+
+      .drawer-foot {
+        border-top: 1px solid var(--ink-35);
+        padding-top: calc(16 * var(--w));
+      }
+
+      .drawer-sub {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: max(11px, calc(13 * var(--w)));
+      }
+
+      .checkout-btn {
+        margin-top: calc(14 * var(--w));
+        width: 100%;
+        height: calc(50 * var(--w));
+        background: var(--ink);
+        color: var(--wall);
+        font-family: var(--cond);
+        font-weight: 500;
+        font-size: max(11px, calc(17 * var(--w)));
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .checkout-note {
+        margin-top: calc(12 * var(--w));
+        font-family: var(--mono);
+        font-size: max(11px, calc(11 * var(--w)));
+        line-height: 1.5;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid var(--ink-35);
+        padding: calc(10 * var(--w));
+      }
+
+      /* Quick Search & Info Popover */
+      .modal-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: 45;
+        background: rgba(58, 53, 80, 0.22);
+        display: none;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 12vh;
+      }
+
+      .modal-scrim.open {
+        display: flex;
+      }
+
+      .search-modal {
+        width: min(520px, 92vw);
+        background: var(--page);
+        border: 1px solid var(--ink-35);
+        padding: 20px;
+      }
+
+      .search-input-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--ink-35);
+        padding-bottom: 10px;
+      }
+
+      .search-input {
+        flex: 1;
+        border: 0;
+        background: transparent;
+        font-family: var(--serif);
+        font-size: 16px;
+        color: var(--ink);
+        outline: none;
+      }
+
+      .search-results {
+        margin-top: 12px;
+        max-height: 54vh;
+        overflow-y: auto;
+      }
+
+      .search-row {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 4px;
+        border-bottom: 1px solid var(--ink-15);
+        text-align: left;
+      }
+
+      .search-row:hover {
+        background: rgba(251, 228, 109, 0.25);
+      }
+
+      .search-thumb {
+        width: 36px;
+        height: 48px;
+        flex-shrink: 0;
+      }
+
+      .toast-msg {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        transform: translateX(-50%);
+        z-index: 50;
+        background: var(--ink);
+        color: var(--wall);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        padding: 9px 16px;
+        border-radius: 99px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+
+      .toast-msg.visible {
+        opacity: 1;
+      }
+
+      /* Flyer */
+      .flyer {
+        position: fixed;
+        z-index: 28;
+        pointer-events: none;
+        transform-origin: top left;
+        will-change: transform;
+      }
+
+      /* Desktop-width portrait screens */
+      @media (min-width: 820px) and (max-aspect-ratio: 1 / 1) {
+        .headline {
+          font-size: calc(150 * var(--u));
+        }
+      }
+
+      /* 9. Small-screen layout */
+      @media (max-width: 819px), (orientation: portrait) and (max-width: 1100px), (orientation: landscape) and (max-height: 500px) {
+        :root {
+          --u: 1px;
+          --w: 1px;
+        }
+
+        header.nav {
+          height: 52px;
+          padding: 0 16px;
+        }
+
+        .nav-logo {
+          font-size: 19px;
+          margin-right: 0;
+        }
+
+        .nav-links,
+        .search-pill,
+        .currency-pill,
+        .icon-account,
+        .icon-heart {
+          display: none;
+        }
+
+        .icon-bag {
+          width: 32px;
+          height: 32px;
+        }
+
+        .icon-bag svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        .hint {
+          top: 62px;
+          bottom: auto;
+          left: 16px;
+          right: 16px;
+          text-align: left;
+          font-size: 11px;
+        }
+
+        .caption {
+          left: 14px;
+          bottom: 100px;
+        }
+
+        .kicker {
+          font-size: 11px;
+          margin: 0 0 8px 0;
+        }
+
+        .headline {
+          font-size: min(23.5vw, 19vh);
+          white-space: normal;
+          line-height: 0.84;
+        }
+
+        .hl-word {
+          display: block;
+        }
+
+        .enter-link {
+          position: static;
+          margin-top: 12px;
+          margin-bottom: 0;
+          display: inline-flex;
+        }
+
+        .arrows {
+          left: 16px;
+          bottom: 24px;
+          top: auto;
+          flex-direction: row;
+          gap: 10px;
+        }
+
+        .arrow-btn {
+          width: 44px;
+          height: 44px;
+        }
+
+        .arrow-btn svg {
+          width: 18px;
+          height: 18px;
+        }
+
+        .toggle {
+          right: 16px;
+          bottom: 30px;
+          padding: 2px;
+        }
+
+        .toggle-btn {
+          height: 26px;
+          padding: 0 14px;
+          font-size: 11px;
+        }
+
+        /* Print page */
+        .pdp-wrap {
+          display: block;
+          max-width: 680px;
+          margin: 0 auto;
+          padding: 64px 20px 0;
+        }
+
+        .pdp-left {
+          position: static;
+          padding-left: 0;
+          width: 100%;
+        }
+
+        #pdp-img {
+          width: 100%;
+          max-width: 420px;
+          margin: 0 auto;
+          box-shadow: 0 0 0 8px #F6EAD8, 0 2px 10px 10px rgba(58, 53, 80, 0.06);
+        }
+
+        .pdp-meta {
+          width: 100%;
+          max-width: 420px;
+          margin: 22px auto 28px;
+        }
+
+        .pdp-title {
+          font-size: 36px;
+        }
+
+        .pdp-artist {
+          font-size: 18px;
+        }
+
+        .pdp-desc {
+          font-size: 14.5px;
+        }
+
+        .chips {
+          gap: 8px;
+        }
+
+        .chip {
+          height: 36px;
+          font-size: 11px;
+        }
+
+        .frame-chip {
+          width: min(calc((100vw - 60px) / 3), 190px);
+          height: 118px;
+        }
+
+        .qty-box {
+          width: 100px;
+          height: 50px;
+        }
+
+        .add-btn {
+          height: 50px;
+        }
+
+        .acc-trig {
+          min-height: 46px;
+        }
+
+        .collection-band {
+          padding: 30px 0 60px max(20px, calc((100vw - 640px) / 2));
+        }
+
+        .collection-head {
+          margin-left: 0;
+          font-size: 30px;
+        }
+
+        .collection-grid {
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          gap: 16px;
+          padding-right: 20px;
+        }
+
+        .collection-grid .print-card {
+          width: 150px;
+          scroll-snap-align: start;
+        }
+
+        /* List */
+        section#list {
+          padding: 76px 16px 60px;
+        }
+
+        .list-head {
+          font-size: 30px;
+          margin-bottom: 24px;
+        }
+
+        .list-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 24px 16px;
+        }
+
+        .list-grid .print-card {
+          width: 100%;
+        }
+
+        /* Drawer */
+        aside.drawer {
+          width: min(88vw, 380px);
+          padding: 22px 20px;
+        }
+      }
+
+      /* Landscape phones */
+      @media (orientation: landscape) and (max-height: 500px) {
+        .caption {
+          bottom: 18px;
+        }
+
+        .headline {
+          font-size: min(13vw, 26vh);
+          white-space: nowrap;
+        }
+
+        .hl-word {
+          display: inline;
+        }
+
+        .enter-link {
+          position: static;
+          margin-top: 8px;
+        }
+
+        .hint {
+          display: none;
+        }
+
+        .arrows {
+          left: auto;
+          right: 16px;
+          bottom: 18px;
+          top: auto;
+          flex-direction: row;
+        }
+
+        .toggle {
+          top: 60px;
+          bottom: auto;
+          right: 16px;
+        }
+      }
+
+      /* 10. Reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          transition-duration: 0.001ms !important;
+          animation-duration: 0.001ms !important;
+          animation-delay: 0ms !important;
+        }
+        body.intro-pending .mask-in {
+          transform: none;
+        }
+        body.intro-pending header.nav > * {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body class="intro-pending">
+    <!-- 1. Nav -->
+    <header class="nav">
+      <a href="#index" class="nav-logo" id="nav-logo">Zestwell</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#index" id="nav-index" class="active">Index</a>
+        <a href="#shop" id="nav-shop">Shop</a>
+        <a href="#info" id="nav-info">Info</a>
+        <a href="#auctions" id="nav-auctions">Auctions</a>
+        <a href="#help" id="nav-help">Help</a>
+      </nav>
+      <div class="nav-right">
+        <button type="button" class="search-pill" id="search-btn" aria-label="Search prints">
+          <span>Search…</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+          <kbd>⌘K</kbd>
+        </button>
+        <button type="button" class="currency-pill" id="currency-btn" aria-label="Currency">
+          <span id="currency-label">USD</span>
+          <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" />
+          </svg>
+        </button>
+        <button type="button" class="nav-icon-btn icon-account" id="account-btn" aria-label="Account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+          </svg>
+        </button>
+        <button type="button" class="nav-icon-btn icon-heart" id="heart-btn" aria-label="Saved prints">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 20.5s-7.5-4.7-9.2-9.2C1.7 8.4 3.4 5 6.8 5c2 0 3.7 1 5.2 2.9C13.5 6 15.2 5 17.2 5c3.4 0 5.1 3.4 4 6.3-1.7 4.5-9.2 9.2-9.2 9.2z" />
+          </svg>
+        </button>
+        <button type="button" class="nav-icon-btn icon-bag" id="bag-btn" aria-label="Shopping bag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M6 8h12l1 12H5L6 8z" />
+            <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+          </svg>
+          <span class="bag-badge" id="bag-badge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Gallery -->
+    <main id="gallery" aria-label="3D Citrus Season Gallery">
+      <div id="veil"></div>
+    </main>
+
+    <!-- 3. Gallery UI -->
+    <div class="gui" id="gui">
+      <div class="arrows">
+        <button type="button" class="arrow-btn" id="prev-btn" aria-label="Previous print">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+          </svg>
+        </button>
+        <button type="button" class="arrow-btn" id="next-btn" aria-label="Next print">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="hint" id="hint">
+        <span class="mask"><span class="mask-in" id="hint-1">Scroll or drag to walk round</span></span>
+        <span class="mask"><span class="mask-in" id="hint-2">Click a painting to look closer</span></span>
+      </div>
+
+      <div class="toggle" role="tablist" aria-label="View mode">
+        <button type="button" class="toggle-btn active" id="toggle-gallery" role="tab" aria-selected="true">GALLERY</button>
+        <button type="button" class="toggle-btn" id="toggle-list" role="tab" aria-selected="false">LIST</button>
+      </div>
+
+      <div class="caption">
+        <p class="kicker"><span class="mask"><span class="mask-in">YOU ARE WALKING PAST</span></span></p>
+        <h1 class="headline">
+          <span class="mask mask-headline"><span class="mask-in"><span class="hl-word">CITRUS</span> <span class="hl-word">SEASON</span></span></span>
+        </h1>
+        <a href="#list" class="enter-link" id="enter-collection">
+          <span class="mask"><span class="mask-in">ENTER THE COLLECTION →</span></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 4. Pill -->
+    <div id="open-pill" aria-hidden="true">OPEN THE PRINT</div>
+
+    <!-- 5. Print Page -->
+    <section id="page" aria-label="Print details">
+      <div class="pdp-wrap">
+        <div class="pdp-left">
+          <div id="pdp-img" data-crop=""></div>
+          <div class="pdp-meta" id="pdp-meta">
+            <span>1/1</span>
+            <button type="button" class="pdp-meta-btn" id="view-room-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+                <path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" />
+              </svg>
+              <span>View in room</span>
+            </button>
+            <button type="button" class="pdp-meta-btn" id="bookmark-btn" aria-label="Bookmark print">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M6 4h12v17l-6-4-6 4V4z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="pdp-right" id="pdp-right">
+          <h2 class="pdp-title" id="pdp-title"></h2>
+          <p class="pdp-artist" id="pdp-artist"></p>
+          <p class="pdp-desc" id="pdp-desc"></p>
+          <p class="pdp-price" id="pdp-price"></p>
+          <p class="pdp-tax">Prices include VAT. Shipping calculated at checkout.</p>
+
+          <div class="opt-groups" id="opt-groups">
+            <div>
+              <div class="opt-label">Paper <span id="val-paper">Art Paper</span></div>
+              <div class="chips" data-group="paper">
+                <button type="button" class="chip on" data-val="Art Paper">Art Paper</button>
+                <button type="button" class="chip" data-val="Fine Art Paper">Fine Art Paper</button>
+                <button type="button" class="chip" data-val="Recycled Paper">Recycled Paper</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="opt-label">Size <span id="val-size">11.7 × 16.5" (A3)</span></div>
+              <div class="chips" data-group="size">
+                <button type="button" class="chip on" data-val='11.7 × 16.5" (A3)'>11.7 × 16.5" (A3)</button>
+                <button type="button" class="chip" data-val='16.5 × 23.4" (A2)'>16.5 × 23.4" (A2)</button>
+                <button type="button" class="chip" data-val='23.4 × 33.1" (A1)'>23.4 × 33.1" (A1)</button>
+                <button type="button" class="chip" data-val='33.1 × 46.8" (A0)'>33.1 × 46.8" (A0)</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="opt-label">Signature <span id="val-sig">Unsigned</span></div>
+              <div class="chips" data-group="sig">
+                <button type="button" class="chip on" data-val="Unsigned">Unsigned</button>
+                <button type="button" class="chip" data-val="Signed and Numbered">Signed and Numbered</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="opt-label">Frame <span id="val-frame">Unframed</span></div>
+              <div class="chips" data-group="frame">
+                <button type="button" class="frame-chip on" data-val="Unframed">
+                  <div class="frame-thumb" data-frame-thumb="0"></div>
+                  <span class="frame-chip-name">Unframed</span>
+                </button>
+                <button type="button" class="frame-chip" data-val="Classic Frame">
+                  <div class="frame-thumb classic" data-frame-thumb="1"></div>
+                  <span class="frame-chip-name">Classic Frame</span>
+                </button>
+                <button type="button" class="frame-chip" data-val="Framed Canvas">
+                  <div class="frame-thumb canvas" data-frame-thumb="2"></div>
+                  <span class="frame-chip-name">Framed Canvas</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="buy-row">
+            <div class="qty-box">
+              <button type="button" class="qty-btn" id="qty-dec" aria-label="Decrease quantity">−</button>
+              <span id="qty-val">1</span>
+              <button type="button" class="qty-btn" id="qty-inc" aria-label="Increase quantity">+</button>
+            </div>
+            <button type="button" class="add-btn" id="add-bag-btn">ADD TO BAG</button>
+          </div>
+
+          <div class="accordions" id="accordions">
+            <div class="acc-row">
+              <button type="button" class="acc-trig" aria-expanded="false">
+                <span>Paper &amp; Sizes</span>
+                <span class="acc-plus">+</span>
+              </button>
+              <div class="acc-body">
+                <div class="acc-body-in">Art Paper is a smooth 200 gsm matte stock. Fine Art Paper is a 310 gsm cotton rag with a soft texture. Recycled Paper is 100% post-consumer fibre.</div>
+              </div>
+            </div>
+            <div class="acc-row">
+              <button type="button" class="acc-trig" aria-expanded="false">
+                <span>Delivery Info</span>
+                <span class="acc-plus">+</span>
+              </button>
+              <div class="acc-body">
+                <div class="acc-body-in">Prints are made to order and ship rolled in a tube within 3–5 working days. Framed pieces ship flat within 7–10 working days.</div>
+              </div>
+            </div>
+            <div class="acc-row">
+              <button type="button" class="acc-trig" aria-expanded="false">
+                <span>Returns Policy</span>
+                <span class="acc-plus">+</span>
+              </button>
+              <div class="acc-body">
+                <div class="acc-body-in">Unframed prints can be returned within 30 days in their original tube. Signed editions are final sale.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collection-band" id="collection-band">
+        <h3 class="collection-head">GET THE COLLECTION</h3>
+        <div class="collection-grid" id="collection-grid"></div>
+      </div>
+    </section>
+
+    <!-- 6. List -->
+    <section id="list" aria-label="Citrus Season — All Prints">
+      <h2 class="list-head">CITRUS SEASON — ALL PRINTS</h2>
+      <div class="list-grid" id="list-grid"></div>
+    </section>
+
+    <!-- 7. Drawer -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <aside class="drawer" id="drawer" aria-label="Your bag">
+      <div class="drawer-head">
+        <h2 class="drawer-title">YOUR BAG</h2>
+        <button type="button" class="drawer-close" id="drawer-close" aria-label="Close bag">×</button>
+      </div>
+      <div class="drawer-items" id="drawer-items"></div>
+      <div class="drawer-foot" id="drawer-foot">
+        <div class="drawer-sub">
+          <span>Subtotal</span>
+          <span id="drawer-subtotal">$ 0.00</span>
+        </div>
+        <button type="button" class="checkout-btn" id="checkout-btn">CHECKOUT →</button>
+        <div class="checkout-note" id="checkout-note" hidden></div>
+      </div>
+    </aside>
+
+    <!-- Quick Search Modal -->
+    <div class="modal-scrim" id="search-modal">
+      <div class="search-modal" role="dialog" aria-label="Search prints">
+        <div class="search-input-row">
+          <input type="text" class="search-input" id="search-input" placeholder="Search prints or artists…" autocomplete="off" />
+          <button type="button" id="search-close" aria-label="Close search">×</button>
+        </div>
+        <div class="search-results" id="search-results"></div>
+      </div>
+    </div>
+
+    <div class="toast-msg" id="toast"></div>
+
+    <script type="module">
+      import * as THREE from "three";
+
+      const SHEET_URL =
+        "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261120_071134_02d2d6ba-ed91-4c3f-87c4-1354b61b5882.png&w=1744&q=85";
+      const SHEET_W = 1744;
+      const SHEET_H = 2336;
+      const COLS = [
+        [0, 575],
+        [585, 1158],
+        [1168, 1743],
+      ];
+      const ROWS = [
+        [0, 769],
+        [779, 1545],
+        [1555, 2335],
+      ];
+      const DESC_SUFFIX =
+        ", painted in flat gouache tones. Printed on archival paper with a soft matte finish.";
+
+      const PRINTS = [
+        { title: "Lemons on Gingham", artist: "Tova Lindqvist", year: 2024, price: 60, desc: "A sunny tabletop of lemons, a striped jug and blue gingham" },
+        { title: "Oranges & Stripe", artist: "Elise Marten", year: 2024, price: 60, desc: "A striped bowl heaped with oranges on a candy-stripe cloth" },
+        { title: "Pink Blooms", artist: "Soren Vale", year: 2023, price: 55, desc: "Pink garden flowers in a cobalt striped jug against warm yellow" },
+        { title: "Citrus Jug", artist: "Nora Feldt", year: 2024, price: 60, desc: "Leafy lemon branches in a striped jug on a sunlit table" },
+        { title: "Teacup & Lemon", artist: "Ada Kerrow", year: 2023, price: 50, desc: "A blue-patterned teacup with a slice of lemon, all morning light" },
+        { title: "Blood Orange Bowl", artist: "Pim Halden", year: 2024, price: 60, desc: "Halved blood oranges glowing in a white bowl on deep blue" },
+        { title: "Lemon Tree, Window", artist: "Ines Morrow", year: 2022, price: 65, desc: "A potted lemon tree by an open window on a gingham table" },
+        { title: "Grapefruit Halves", artist: "Juno Basset", year: 2024, price: 55, desc: "Pink grapefruit halves on a hand-painted checked plate" },
+        { title: "Daisies in Stripes", artist: "Wren Calloway", year: 2023, price: 55, desc: "White daisies in a tall striped pitcher against blush pink" },
+      ].map((p, i) => {
+        const col = COLS[i % 3];
+        const row = ROWS[Math.floor(i / 3)];
+        return {
+          ...p,
+          id: i,
+          fullDesc: p.desc + DESC_SUFFIX,
+          crop: {
+            x: col[0] + 6,
+            y: row[0] + 6,
+            w: col[1] - col[0] - 12,
+            h: row[1] - row[0] - 12,
+          },
+        };
+      });
+
+      const CURRENCIES = {
+        USD: { symbol: "$", rate: 1 },
+        EUR: { symbol: "€", rate: 0.92 },
+        GBP: { symbol: "£", rate: 0.79 },
+      };
+      let currentCurrency = "USD";
+
+      function formatPrice(usd) {
+        const c = CURRENCIES[currentCurrency];
+        return `${c.symbol} ${(usd * c.rate).toFixed(2)}`;
+      }
+
+      const SMALL_MQ = window.matchMedia(
+        "(max-width: 819px), (orientation: portrait) and (max-width: 1100px), (orientation: landscape) and (max-height: 500px)"
+      );
+      const REDUCED_MQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      const isSmallScreen = () => SMALL_MQ.matches;
+      const isPortraitSmall = () => isSmallScreen() && window.innerHeight > window.innerWidth;
+      const isReducedMotion = () => REDUCED_MQ.matches;
+
+      // DOM refs
+      const galleryEl = document.getElementById("gallery");
+      const veilEl = document.getElementById("veil");
+      const guiEl = document.getElementById("gui");
+      const hint1El = document.getElementById("hint-1");
+      const hint2El = document.getElementById("hint-2");
+      const openPillEl = document.getElementById("open-pill");
+      const pageEl = document.getElementById("page");
+      const pdpImgEl = document.getElementById("pdp-img");
+      const pdpMetaEl = document.getElementById("pdp-meta");
+      const pdpRightEl = document.getElementById("pdp-right");
+      const collectionBandEl = document.getElementById("collection-band");
+      const collectionGridEl = document.getElementById("collection-grid");
+      const listEl = document.getElementById("list");
+      const listGridEl = document.getElementById("list-grid");
+      const drawerEl = document.getElementById("drawer");
+      const drawerBackdropEl = document.getElementById("drawer-backdrop");
+      const drawerItemsEl = document.getElementById("drawer-items");
+      const drawerSubtotalEl = document.getElementById("drawer-subtotal");
+      const bagBadgeEl = document.getElementById("bag-badge");
+      const toggleGalleryBtn = document.getElementById("toggle-gallery");
+      const toggleListBtn = document.getElementById("toggle-list");
+      const navIndexEl = document.getElementById("nav-index");
+      const navShopEl = document.getElementById("nav-shop");
+      const toastEl = document.getElementById("toast");
+
+      let toastTimer = 0;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("visible"), 2200);
+      }
+
+      // DOM crop helper
+      function applyDomCrop(el, printIdx) {
+        const { x, y, w, h } = PRINTS[printIdx].crop;
+        const rect = el.getBoundingClientRect();
+        const W = rect.width || el.offsetWidth;
+        const H = rect.height || el.offsetHeight;
+        if (!W || !H) return;
+        const sx = W / w;
+        const sy = H / h;
+        el.style.backgroundImage = `url("${SHEET_URL}")`;
+        el.style.backgroundRepeat = "no-repeat";
+        el.style.backgroundSize = `${(SHEET_W * sx).toFixed(2)}px ${(SHEET_H * sy).toFixed(2)}px`;
+        el.style.backgroundPosition = `${(-x * sx).toFixed(2)}px ${(-y * sy).toFixed(2)}px`;
+      }
+
+      function updateAllDomCrops() {
+        document.querySelectorAll("[data-crop]").forEach((el) => {
+          const idx = Number(el.dataset.crop);
+          if (!Number.isNaN(idx) && el.dataset.crop !== "") {
+            applyDomCrop(el, idx);
+          }
+        });
+      }
+
+      const cropObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const el = entry.target;
+          const idx = Number(el.dataset.crop);
+          if (!Number.isNaN(idx) && el.dataset.crop !== "") {
+            applyDomCrop(el, idx);
+          }
+        }
+      });
+
+      function registerCropEl(el, printIdx) {
+        el.dataset.crop = String(printIdx);
+        applyDomCrop(el, printIdx);
+        cropObserver.observe(el);
+      }
+
+      // Build list cards once
+      function createPrintCard(printIdx, onClick) {
+        const p = PRINTS[printIdx];
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "print-card";
+        const img = document.createElement("div");
+        img.className = "print-card-img";
+        const title = document.createElement("div");
+        title.className = "print-card-title";
+        title.textContent = p.title;
+        const artist = document.createElement("div");
+        artist.className = "print-card-artist";
+        artist.textContent = p.artist;
+        const price = document.createElement("div");
+        price.className = "print-card-price";
+        price.dataset.usd = String(p.price);
+        price.textContent = formatPrice(p.price);
+        btn.append(img, title, artist, price);
+        registerCropEl(img, printIdx);
+        btn.addEventListener("click", () => onClick(printIdx, img));
+        return btn;
+      }
+
+      PRINTS.forEach((p) => {
+        listGridEl.appendChild(
+          createPrintCard(p.id, (idx, imgEl) => {
+            openPrintPage(idx, imgEl.getBoundingClientRect());
+          })
+        );
+      });
+
+      // State
+      let currentMode = "gallery"; // "gallery" | "list" | "page"
+      let lastPrintIdx = 0;
+      let activePdpIdx = 0;
+      let pdpDetailsTimer = 0;
+      let activeFlyer = null;
+      const savedSet = new Set();
+
+      // Options state
+      const selectedOpts = {
+        paper: "Art Paper",
+        size: '11.7 × 16.5" (A3)',
+        sig: "Unsigned",
+        frame: "Unframed",
+      };
+      let pdpQty = 1;
+
+      // Bag state
+      const bag = [];
+      let bagEnterTimer = 0;
+
+      // ---------------- THREE.JS SCENE ----------------
+      const isSoftwareGl = (() => {
+        const gl = document.createElement("canvas").getContext("webgl2");
+        if (!gl) return true;
+        const ext = gl.getExtension("WEBGL_debug_renderer_info");
+        const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
+        const gpu = String(gl.getParameter(param));
+        gl.getExtension("WEBGL_lose_context")?.loseContext();
+        return /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
+      })();
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: !isSoftwareGl,
+        powerPreference: "high-performance",
+      });
+      renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.NoToneMapping;
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      galleryEl.insertBefore(renderer.domElement, veilEl);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xfff9ec);
+      scene.fog = new THREE.Fog(0xfff9ec, 10, 46);
+
+      const getFov = () => (window.innerWidth >= window.innerHeight ? 56 : 70);
+      const camera = new THREE.PerspectiveCamera(
+        getFov(),
+        window.innerWidth / window.innerHeight,
+        0.05,
+        100
+      );
+
+      scene.add(new THREE.HemisphereLight(0xfffdf6, 0xe9cfa6, 1.55));
+      scene.add(new THREE.AmbientLight(0xfff6e6, 0.55));
+
+      const R = 18;
+      const RIN = 12.2;
+      const H = 6.2;
+      const PW = 1.36;
+      const PH = (1.36 * 763) / 567;
+      const PY = 1.95;
+      const STEP = (2 * Math.PI) / 36;
+      const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+      // Procedural wall & floor gradient textures
+      function makeVerticalGradientTex(stops) {
+        const c = document.createElement("canvas");
+        c.width = 4;
+        c.height = 256;
+        const ctx = c.getContext("2d");
+        const g = ctx.createLinearGradient(0, 0, 0, 256);
+        for (const [offset, color] of stops) g.addColorStop(offset, color);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 4, 256);
+        const tex = new THREE.CanvasTexture(c);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        return tex;
+      }
+
+      const outerWallTex = makeVerticalGradientTex([
+        [0, "#F5EBD8"],
+        [0.2, "#FBF3E3"],
+        [0.6, "#FBF3E3"],
+        [0.86, "#F8EDD9"],
+        [1, "#EFDFC4"],
+      ]);
+      const innerWallTex = makeVerticalGradientTex([
+        [0, "#F7EEDD"],
+        [0.3, "#FFFAF0"],
+        [0.8, "#FDF5E6"],
+        [1, "#F1E1C6"],
+      ]);
+
+      const outerWall = new THREE.Mesh(
+        new THREE.CylinderGeometry(R, R, H, 160, 1, true),
+        new THREE.MeshBasicMaterial({ map: outerWallTex, side: THREE.BackSide })
+      );
+      outerWall.position.y = 3.1;
+      scene.add(outerWall);
+
+      const innerPillar = new THREE.Mesh(
+        new THREE.CylinderGeometry(RIN, RIN, H, 120, 1, true),
+        new THREE.MeshBasicMaterial({ map: innerWallTex, side: THREE.FrontSide })
+      );
+      innerPillar.position.y = 3.1;
+      scene.add(innerPillar);
+
+      // Floor
+      const floorCanvas = document.createElement("canvas");
+      floorCanvas.width = 1024;
+      floorCanvas.height = 1024;
+      const fCtx = floorCanvas.getContext("2d");
+      const fg = fCtx.createRadialGradient(512, 512, (512 * RIN) / R, 512, 512, 512);
+      fg.addColorStop(0, "#EDD6B0");
+      fg.addColorStop(0.55, "#F3E1C3");
+      fg.addColorStop(1, "#EFDAB8");
+      fCtx.fillStyle = fg;
+      fCtx.fillRect(0, 0, 1024, 1024);
+      const floorTex = new THREE.CanvasTexture(floorCanvas);
+      floorTex.colorSpace = THREE.SRGBColorSpace;
+      floorTex.anisotropy = maxAniso;
+
+      const floor = new THREE.Mesh(
+        new THREE.CircleGeometry(R, 160),
+        new THREE.MeshBasicMaterial({ map: floorTex })
+      );
+      floor.rotation.x = -Math.PI / 2;
+      scene.add(floor);
+
+      // Ceiling
+      const ceiling = new THREE.Mesh(
+        new THREE.CircleGeometry(R, 160),
+        new THREE.MeshBasicMaterial({ color: 0xfaf1e0, side: THREE.BackSide })
+      );
+      ceiling.rotation.x = -Math.PI / 2;
+      ceiling.position.y = H;
+      scene.add(ceiling);
+
+      // Halo & Shadow textures
+      function makeRadialTex(innerColor, innerStop, outerColor) {
+        const c = document.createElement("canvas");
+        c.width = 256;
+        c.height = 256;
+        const ctx = c.getContext("2d");
+        const g = ctx.createRadialGradient(128, 128, 128 * innerStop, 128, 128, 128);
+        g.addColorStop(0, innerColor);
+        g.addColorStop(1, outerColor);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 256, 256);
+        const tex = new THREE.CanvasTexture(c);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        return tex;
+      }
+
+      const haloTex = makeRadialTex("rgba(255,255,255,0.95)", 0.35, "rgba(255,255,255,0)");
+      const shadowTex = makeRadialTex("rgba(120,90,50,0.28)", 0.25, "rgba(120,90,50,0)");
+
+      const haloMat = new THREE.MeshBasicMaterial({
+        map: haloTex,
+        transparent: true,
+        depthWrite: false,
+        fog: true,
+      });
+      const shadowMat = new THREE.MeshBasicMaterial({
+        map: shadowTex,
+        transparent: true,
+        depthWrite: false,
+        fog: true,
+      });
+      const frameMat = new THREE.MeshBasicMaterial({ color: 0xd3aa72 });
+
+      const haloGeo = new THREE.PlaneGeometry(2.1 * PW, 1.75 * PH);
+      const shadowGeo = new THREE.PlaneGeometry(1.25 * PW, 1.18 * PH);
+      const frameGeo = new THREE.BoxGeometry(PW + 0.07, PH + 0.07, 0.06);
+      const printGeo = new THREE.PlaneGeometry(PW, PH);
+      const labelGeo = new THREE.PlaneGeometry(0.92, (0.92 * 260) / 640);
+
+      // Shared print materials & label materials (9 each)
+      const printMaterials = PRINTS.map(
+        () => new THREE.MeshBasicMaterial({ color: 0xf7efe0 })
+      );
+
+      const labelTextures = PRINTS.map(() => {
+        const c = document.createElement("canvas");
+        c.width = 640;
+        c.height = 260;
+        const tex = new THREE.CanvasTexture(c);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = maxAniso;
+        return { canvas: c, tex };
+      });
+
+      function drawWallLabels() {
+        PRINTS.forEach((p, i) => {
+          const { canvas, tex } = labelTextures[i];
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, 640, 260);
+          ctx.textBaseline = "alphabetic";
+          ctx.fillStyle = "#3A3550";
+          ctx.font = '500 58px "Newsreader", Georgia, serif';
+          ctx.fillText(p.artist, 30, 82);
+          ctx.font = 'italic 400 54px "Newsreader", Georgia, serif';
+          ctx.fillText(p.title, 30, 150);
+          ctx.fillStyle = "rgba(58, 53, 80, 0.7)";
+          ctx.font = '400 30px "DM Mono", ui-monospace, monospace';
+          ctx.fillText(`${p.year} · PRINT`, 30, 215);
+          tex.needsUpdate = true;
+        });
+      }
+
+      const labelMaterials = labelTextures.map(
+        ({ tex }) =>
+          new THREE.MeshBasicMaterial({
+            map: tex,
+            transparent: true,
+            depthWrite: false,
+          })
+      );
+
+      const clickablePrints = [];
+      const outerPrints = [];
+
+      function addPrintGroup(wall, angle, radius, printIndex) {
+        const group = new THREE.Group();
+        const gx = radius * Math.cos(angle);
+        const gz = radius * Math.sin(angle);
+        group.position.set(gx, 0, gz);
+        if (wall === "outer") {
+          group.lookAt(0, 0, 0);
+        } else {
+          group.lookAt(2 * gx, 0, 2 * gz);
+        }
+
+        const halo = new THREE.Mesh(haloGeo, haloMat);
+        halo.position.set(0, PY + 0.05, 0.005);
+        group.add(halo);
+
+        const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+        shadow.position.set(0.05, PY - 0.06, 0.01);
+        group.add(shadow);
+
+        const frame = new THREE.Mesh(frameGeo, frameMat);
+        frame.position.set(0, PY, 0.045);
+        group.add(frame);
+
+        const printMesh = new THREE.Mesh(printGeo, printMaterials[printIndex]);
+        printMesh.position.set(0, PY, 0.077);
+        printMesh.userData = { printIndex, wall, angle, group };
+        group.add(printMesh);
+
+        const label = new THREE.Mesh(labelGeo, labelMaterials[printIndex]);
+        label.position.set(-PW / 2 + 0.46, PY - PH / 2 - 0.42, 0.02);
+        group.add(label);
+
+        scene.add(group);
+        clickablePrints.push(printMesh);
+        if (wall === "outer") outerPrints.push(printMesh);
+      }
+
+      for (let s = 0; s < 36; s++) {
+        addPrintGroup("outer", (s * 2 * Math.PI) / 36, 17.98, s % 9);
+      }
+      for (let k = 0; k < 24; k++) {
+        addPrintGroup("inner", ((k + 0.5) * 2 * Math.PI) / 24, 12.22, (k + 4) % 9);
+      }
+
+      // ---------------- CAMERA POSE & ANIMATION ----------------
+      function getWalkOffset() {
+        return isPortraitSmall() ? 0.14 + 0.9 * STEP : 0.14;
+      }
+
+      function getWalkPose(th) {
+        if (isPortraitSmall()) {
+          return { th, r: 15.4, yaw: -0.42, y: 1.9, pitch: -0.1 };
+        }
+        return { th, r: 15.6, yaw: -0.3, y: 1.92, pitch: -0.12 };
+      }
+
+      function getFocusPose(th, wall) {
+        const off = isPortraitSmall() ? 5.2 : 4.26;
+        const y = isPortraitSmall() ? PY - 1.05 : PY - 0.52;
+        if (wall === "outer") {
+          return { th, r: R - off, yaw: Math.PI / 2, y, pitch: 0 };
+        }
+        return { th, r: RIN + off, yaw: -Math.PI / 2, y, pitch: 0 };
+      }
+
+      function nearestAngle(baseAngle, refAngle) {
+        let a = baseAngle;
+        while (a - refAngle > Math.PI) a -= 2 * Math.PI;
+        while (a - refAngle < -Math.PI) a += 2 * Math.PI;
+        return a;
+      }
+
+      let D = getWalkOffset();
+      let pose = getWalkPose(D);
+      let targetTh = D;
+      let focusedMesh = null;
+      let hoveredMesh = null;
+
+      let glide = null; // { from, to, start, duration }
+      let intro = null; // { from, to, start, duration }
+      let introStarted = false;
+
+      const _lookTarget = new THREE.Vector3();
+
+      function applyPoseToCamera(p) {
+        const cosTh = Math.cos(p.th);
+        const sinTh = Math.sin(p.th);
+        const px = p.r * cosTh;
+        const py = p.y;
+        const pz = p.r * sinTh;
+        const tx = sinTh;
+        const tz = -cosTh;
+        const cosY = Math.cos(p.yaw);
+        const sinY = Math.sin(p.yaw);
+        const dx = cosY * tx + sinY * cosTh;
+        const dz = cosY * tz + sinY * sinTh;
+        camera.position.set(px, py, pz);
+        _lookTarget.set(px + dx, py + p.pitch, pz + dz);
+        camera.lookAt(_lookTarget);
+      }
+
+      function setHintFocused(focused) {
+        if (focused) {
+          hint1El.textContent = "Click the painting to open it";
+          hint2El.textContent = "Esc or click away to step back";
+        } else {
+          hint1El.textContent = "Scroll or drag to walk round";
+          hint2El.textContent = "Click a painting to look closer";
+        }
+      }
+
+      function updateMobilePill() {
+        if (focusedMesh && isSmallScreen() && currentMode === "gallery") {
+          const rect = getPrintScreenRect(focusedMesh);
+          openPillEl.style.left = `${rect.left + rect.width * 0.5}px`;
+          openPillEl.style.top = `${rect.top + rect.height * 0.55}px`;
+          openPillEl.classList.add("visible");
+        } else if (!focusedMesh || currentMode !== "gallery") {
+          openPillEl.classList.remove("visible");
+        }
+      }
+
+      function focusOnPrint(mesh) {
+        const { angle, wall, printIndex } = mesh.userData;
+        lastPrintIdx = printIndex;
+        const thDest = nearestAngle(angle, pose.th);
+        const to = getFocusPose(thDest, wall);
+        focusedMesh = mesh;
+        setHintFocused(true);
+        const duration = isReducedMotion() ? 0 : 950;
+        if (duration === 0) {
+          pose = { ...to };
+          targetTh = to.th;
+          glide = null;
+          applyPoseToCamera(pose);
+          updateMobilePill();
+        } else {
+          glide = {
+            from: { ...pose },
+            to,
+            start: performance.now(),
+            duration,
+          };
+        }
+      }
+
+      function stepBackFromFocus() {
+        if (!focusedMesh) return;
+        focusedMesh = null;
+        openPillEl.classList.remove("visible");
+        setHintFocused(false);
+        const destTh = pose.th + D;
+        targetTh = destTh;
+        const to = getWalkPose(destTh);
+        const duration = isReducedMotion() ? 0 : 950;
+        if (duration === 0) {
+          pose = { ...to };
+          glide = null;
+          applyPoseToCamera(pose);
+        } else {
+          glide = {
+            from: { ...pose },
+            to,
+            start: performance.now(),
+            duration,
+          };
+        }
+      }
+
+      // Project print plane corners to screen rect
+      const _corner = new THREE.Vector3();
+      function getPrintScreenRect(mesh) {
+        mesh.updateWorldMatrix(true, false);
+        const halfW = PW / 2;
+        const halfH = PH / 2;
+        const corners = [
+          [-halfW, -halfH, 0],
+          [halfW, -halfH, 0],
+          [halfW, halfH, 0],
+          [-halfW, halfH, 0],
+        ];
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        for (const [cx, cy, cz] of corners) {
+          _corner.set(cx, cy, cz).applyMatrix4(mesh.matrixWorld).project(camera);
+          const sx = ((_corner.x + 1) / 2) * w;
+          const sy = ((-_corner.y + 1) / 2) * h;
+          if (sx < minX) minX = sx;
+          if (sy < minY) minY = sy;
+          if (sx > maxX) maxX = sx;
+          if (sy > maxY) maxY = sy;
+        }
+        return {
+          left: minX,
+          top: minY,
+          width: Math.max(10, maxX - minX),
+          height: Math.max(10, maxY - minY),
+        };
+      }
+
+      // ---------------- ENTRANCE & ASSET LOADING ----------------
+      function startEntrance() {
+        if (introStarted) return;
+        introStarted = true;
+        drawWallLabels();
+
+        if (isReducedMotion()) {
+          document.body.classList.remove("intro-pending");
+          veilEl.classList.add("gone");
+          pose = getWalkPose(D);
+          targetTh = D;
+          applyPoseToCamera(pose);
+          return;
+        }
+
+        // Stagger masked text lines then nav children
+        const masks = document.querySelectorAll(".gui .mask-in");
+        const navChildren = document.querySelectorAll("header.nav > *");
+        let idx = 0;
+        masks.forEach((el) => {
+          el.style.animationDelay = `${250 + idx * 60}ms`;
+          idx++;
+        });
+        navChildren.forEach((el) => {
+          el.style.animationDelay = `${250 + idx * 60}ms`;
+          idx++;
+        });
+
+        document.body.classList.remove("intro-pending");
+        document.body.classList.add("intro-running");
+
+        requestAnimationFrame(() => {
+          veilEl.classList.add("gone");
+        });
+
+        const endPose = getWalkPose(D);
+        const startPose = { ...endPose, th: D + 0.16, r: endPose.r - 0.35 };
+        pose = { ...startPose };
+        targetTh = endPose.th;
+        intro = {
+          from: startPose,
+          to: endPose,
+          start: performance.now(),
+          duration: 1400,
+        };
+      }
+
+      let texLoaded = false;
+      let fontsReady = false;
+      function tryStartEntrance() {
+        if (texLoaded && fontsReady) startEntrance();
+      }
+
+      const sheetImg = new Image();
+      sheetImg.crossOrigin = "anonymous";
+      sheetImg.onload = () => {
+        const baseTex = new THREE.Texture(sheetImg);
+        baseTex.colorSpace = THREE.SRGBColorSpace;
+        baseTex.wrapS = THREE.ClampToEdgeWrapping;
+        baseTex.wrapT = THREE.ClampToEdgeWrapping;
+        baseTex.anisotropy = maxAniso;
+        baseTex.needsUpdate = true;
+
+        PRINTS.forEach((p, i) => {
+          const tex = baseTex.clone();
+          tex.image = sheetImg;
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.wrapS = THREE.ClampToEdgeWrapping;
+          tex.wrapT = THREE.ClampToEdgeWrapping;
+          tex.anisotropy = maxAniso;
+          tex.repeat.set(p.crop.w / SHEET_W, p.crop.h / SHEET_H);
+          tex.offset.set(p.crop.x / SHEET_W, 1 - (p.crop.y + p.crop.h) / SHEET_H);
+          tex.needsUpdate = true;
+          printMaterials[i].color.setHex(0xffffff);
+          printMaterials[i].map = tex;
+          printMaterials[i].needsUpdate = true;
+        });
+
+        texLoaded = true;
+        tryStartEntrance();
+      };
+      sheetImg.onerror = () => {
+        texLoaded = true;
+        tryStartEntrance();
+      };
+      sheetImg.src = SHEET_URL;
+
+      document.fonts.ready.then(() => {
+        fontsReady = true;
+        drawWallLabels();
+        tryStartEntrance();
+      });
+
+      setTimeout(startEntrance, 4000);
+
+      // ---------------- INPUT & NAVIGATION ----------------
+      const raycaster = new THREE.Raycaster();
+      const pointerNdc = new THREE.Vector2();
+      let lastRaycast = 0;
+
+      function raycastPrints(clientX, clientY) {
+        pointerNdc.x = (clientX / window.innerWidth) * 2 - 1;
+        pointerNdc.y = -(clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(pointerNdc, camera);
+        const hits = raycaster.intersectObjects(clickablePrints, false);
+        return hits.length > 0 ? hits[0].object : null;
+      }
+
+      let pointerDown = false;
+      let dragging = false;
+      let downX = 0;
+      let downY = 0;
+      let downAngle = 0;
+
+      galleryEl.addEventListener("pointerdown", (e) => {
+        if (currentMode !== "gallery") return;
+        pointerDown = true;
+        dragging = false;
+        downX = e.clientX;
+        downY = e.clientY;
+        downAngle = targetTh;
+        if (galleryEl.setPointerCapture) {
+          try {
+            galleryEl.setPointerCapture(e.pointerId);
+          } catch {}
+        }
+      });
+
+      galleryEl.addEventListener("pointermove", (e) => {
+        if (currentMode !== "gallery") return;
+        if (pointerDown) {
+          const dx = e.clientX - downX;
+          const dy = e.clientY - downY;
+          if (!dragging && Math.hypot(dx, dy) > 6) {
+            dragging = true;
+            galleryEl.classList.add("grabbing");
+            galleryEl.classList.remove("pointing");
+            openPillEl.classList.remove("visible");
+            if (focusedMesh) stepBackFromFocus();
+          }
+          if (dragging) {
+            const deltaPx = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+            const factor = isSmallScreen() ? 0.0042 : 0.0022;
+            targetTh = downAngle + deltaPx * factor;
+            if (isReducedMotion()) {
+              pose.th = targetTh;
+              applyPoseToCamera(pose);
+            }
+          }
+          return;
+        }
+
+        // Hover raycast (throttled)
+        const now = performance.now();
+        if (now - lastRaycast < 32) return;
+        lastRaycast = now;
+        const hit = raycastPrints(e.clientX, e.clientY);
+        hoveredMesh = hit;
+        galleryEl.classList.toggle("pointing", Boolean(hit));
+        if (focusedMesh && hit === focusedMesh && !isSmallScreen()) {
+          openPillEl.style.left = `${e.clientX}px`;
+          openPillEl.style.top = `${e.clientY}px`;
+          openPillEl.classList.add("visible");
+        } else if (!isSmallScreen()) {
+          openPillEl.classList.remove("visible");
+        }
+      });
+
+      galleryEl.addEventListener("pointerup", (e) => {
+        if (!pointerDown) return;
+        pointerDown = false;
+        galleryEl.classList.remove("grabbing");
+        if (dragging) {
+          dragging = false;
+          return;
+        }
+        if (currentMode !== "gallery") return;
+        const hit = raycastPrints(e.clientX, e.clientY);
+        if (hit) {
+          if (focusedMesh === hit) {
+            openPrintPage(hit.userData.printIndex, getPrintScreenRect(hit));
+          } else {
+            focusOnPrint(hit);
+          }
+        } else if (focusedMesh) {
+          stepBackFromFocus();
+        }
+      });
+
+      galleryEl.addEventListener("pointercancel", () => {
+        pointerDown = false;
+        dragging = false;
+        galleryEl.classList.remove("grabbing");
+      });
+
+      window.addEventListener(
+        "wheel",
+        (e) => {
+          if (currentMode !== "gallery") return;
+          if (drawerEl.classList.contains("open")) return;
+          if (document.getElementById("search-modal").classList.contains("open")) return;
+          if (focusedMesh) stepBackFromFocus();
+          const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+          targetTh += -dy * 0.0016;
+          if (isReducedMotion()) {
+            pose.th = targetTh;
+            applyPoseToCamera(pose);
+          }
+        },
+        { passive: true }
+      );
+
+      function stepSlot(dir) {
+        if (currentMode !== "gallery") return;
+        if (focusedMesh) stepBackFromFocus();
+        targetTh = (Math.round((targetTh - D) / STEP) - dir) * STEP + D;
+        if (isReducedMotion()) {
+          pose.th = targetTh;
+          applyPoseToCamera(pose);
+        }
+      }
+
+      document.getElementById("prev-btn").addEventListener("click", () => stepSlot(-1));
+      document.getElementById("next-btn").addEventListener("click", () => stepSlot(1));
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const searchModal = document.getElementById("search-modal");
+          if (searchModal.classList.contains("open")) {
+            searchModal.classList.remove("open");
+            return;
+          }
+          if (drawerEl.classList.contains("open")) {
+            closeDrawer();
+            return;
+          }
+          if (currentMode === "page" || currentMode === "list") {
+            returnToGallery();
+            return;
+          }
+          if (focusedMesh) {
+            stepBackFromFocus();
+          }
+          return;
+        }
+
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+          e.preventDefault();
+          openSearchModal();
+          return;
+        }
+
+        if (currentMode === "gallery" && !drawerEl.classList.contains("open")) {
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            e.preventDefault();
+            stepSlot(1);
+          } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            e.preventDefault();
+            stepSlot(-1);
+          }
+        }
+      });
+
+      // ---------------- PRINT PAGE, LIST & FLYER ----------------
+      function renderCollectionCards(currentIdx) {
+        collectionGridEl.innerHTML = "";
+        for (let k = 0; k < 4; k++) {
+          const idx = (currentIdx + k) % 9;
+          collectionGridEl.appendChild(
+            createPrintCard(idx, (chosenIdx, imgEl) => {
+              const fromRect = imgEl.getBoundingClientRect();
+              openPrintPage(chosenIdx, fromRect, true);
+            })
+          );
+        }
+      }
+
+      function populatePrintPage(idx) {
+        activePdpIdx = idx;
+        lastPrintIdx = idx;
+        const p = PRINTS[idx];
+        document.getElementById("pdp-title").textContent = p.title;
+        document.getElementById("pdp-artist").textContent = p.artist;
+        document.getElementById("pdp-desc").textContent = p.fullDesc;
+        const priceEl = document.getElementById("pdp-price");
+        priceEl.dataset.usd = String(p.price);
+        priceEl.textContent = formatPrice(p.price);
+
+        // Update frame thumbnails to current print
+        document.querySelectorAll("[data-frame-thumb]").forEach((el) => {
+          registerCropEl(el, idx);
+        });
+
+        registerCropEl(pdpImgEl, idx);
+        renderCollectionCards(idx);
+        updateBookmarkIcon();
+      }
+
+      function openPrintPage(idx, fromRect, fromCollectionCard = false) {
+        clearTimeout(pdpDetailsTimer);
+        if (activeFlyer) {
+          activeFlyer.remove();
+          activeFlyer = null;
+        }
+
+        currentMode = "page";
+        document.body.classList.add("overlay-open");
+        guiEl.classList.add("hidden");
+        openPillEl.classList.remove("visible");
+        listEl.classList.remove("open");
+
+        pdpImgEl.classList.remove("ready");
+        pdpMetaEl.classList.remove("visible");
+        pdpRightEl.classList.remove("visible");
+        collectionBandEl.classList.remove("visible");
+
+        populatePrintPage(idx);
+        pageEl.classList.add("open");
+        if (fromCollectionCard) {
+          pageEl.scrollTo({ top: 0, behavior: isReducedMotion() ? "auto" : "smooth" });
+        } else {
+          pageEl.scrollTop = 0;
+        }
+
+        updateNavActive("shop");
+
+        // Measure destination image box at scrollTop 0
+        requestAnimationFrame(() => {
+          const rawTo = pdpImgEl.getBoundingClientRect();
+          const scrollOffset = pageEl.scrollTop;
+          const toRect = {
+            left: rawTo.left,
+            top: rawTo.top + scrollOffset,
+            width: rawTo.width,
+            height: rawTo.height,
+          };
+
+          if (isReducedMotion() || !fromRect) {
+            pdpImgEl.classList.add("ready");
+            pdpMetaEl.classList.add("visible");
+            pdpRightEl.classList.add("visible");
+            collectionBandEl.classList.add("visible");
+            return;
+          }
+
+          const flyer = document.createElement("div");
+          flyer.className = "flyer";
+          flyer.style.left = `${toRect.left}px`;
+          flyer.style.top = `${toRect.top}px`;
+          flyer.style.width = `${toRect.width}px`;
+          flyer.style.height = `${toRect.height}px`;
+          applyDomCrop(flyer, idx);
+          document.body.appendChild(flyer);
+          activeFlyer = flyer;
+
+          const dx = fromRect.left - toRect.left;
+          const dy = fromRect.top - toRect.top;
+          const sx = fromRect.width / toRect.width;
+          const sy = fromRect.height / toRect.height;
+
+          const anim = flyer.animate(
+            [
+              { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
+              { transform: "translate(0px, 0px) scale(1, 1)" },
+            ],
+            { duration: 300, easing: "cubic-bezier(0.25, 0.75, 0.25, 1)", fill: "forwards" }
+          );
+
+          anim.onfinish = () => {
+            pdpImgEl.classList.add("ready");
+            flyer.remove();
+            if (activeFlyer === flyer) activeFlyer = null;
+          };
+
+          pdpDetailsTimer = setTimeout(() => {
+            pdpMetaEl.classList.add("visible");
+            pdpRightEl.classList.add("visible");
+            collectionBandEl.classList.add("visible");
+          }, 1000);
+        });
+      }
+
+      function openListView() {
+        clearTimeout(pdpDetailsTimer);
+        if (activeFlyer) {
+          activeFlyer.remove();
+          activeFlyer = null;
+        }
+        currentMode = "list";
+        document.body.classList.add("overlay-open");
+        guiEl.classList.add("hidden");
+        openPillEl.classList.remove("visible");
+        pageEl.classList.remove("open");
+        listEl.classList.add("open");
+        listEl.scrollTop = 0;
+        toggleGalleryBtn.classList.remove("active");
+        toggleGalleryBtn.setAttribute("aria-selected", "false");
+        toggleListBtn.classList.add("active");
+        toggleListBtn.setAttribute("aria-selected", "true");
+        updateNavActive("shop");
+        requestAnimationFrame(updateAllDomCrops);
+      }
+
+      function findNearestOuterMesh(printIdx, refAngle) {
+        let best = outerPrints[0];
+        let bestDist = Infinity;
+        for (const m of outerPrints) {
+          if (m.userData.printIndex !== printIdx) continue;
+          const a = nearestAngle(m.userData.angle, refAngle);
+          const dist = Math.abs(a - refAngle);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = m;
+          }
+        }
+        return best;
+      }
+
+      function returnToGallery(targetPrintIdx = lastPrintIdx) {
+        clearTimeout(pdpDetailsTimer);
+        if (activeFlyer) {
+          activeFlyer.remove();
+          activeFlyer = null;
+        }
+        currentMode = "gallery";
+        document.body.classList.remove("overlay-open");
+        pageEl.classList.remove("open");
+        listEl.classList.remove("open");
+        guiEl.classList.remove("hidden");
+        toggleListBtn.classList.remove("active");
+        toggleListBtn.setAttribute("aria-selected", "false");
+        toggleGalleryBtn.classList.add("active");
+        toggleGalleryBtn.setAttribute("aria-selected", "true");
+        updateNavActive("index");
+
+        const mesh = findNearestOuterMesh(targetPrintIdx, pose.th);
+        if (mesh) focusOnPrint(mesh);
+      }
+
+      function updateNavActive(which) {
+        navIndexEl.classList.toggle("active", which === "index");
+        navShopEl.classList.toggle("active", which === "shop");
+      }
+
+      // Options & Qty
+      document.getElementById("opt-groups").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-val]");
+        if (!btn) return;
+        const groupEl = btn.closest("[data-group]");
+        const group = groupEl.dataset.group;
+        const val = btn.dataset.val;
+        selectedOpts[group] = val;
+        groupEl.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
+        document.getElementById(`val-${group}`).textContent = val;
+      });
+
+      const qtyValEl = document.getElementById("qty-val");
+      document.getElementById("qty-dec").addEventListener("click", () => {
+        if (pdpQty > 1) {
+          pdpQty--;
+          qtyValEl.textContent = String(pdpQty);
+        }
+      });
+      document.getElementById("qty-inc").addEventListener("click", () => {
+        if (pdpQty < 9) {
+          pdpQty++;
+          qtyValEl.textContent = String(pdpQty);
+        }
+      });
+
+      // Accordions
+      document.getElementById("accordions").addEventListener("click", (e) => {
+        const trig = e.target.closest(".acc-trig");
+        if (!trig) return;
+        const row = trig.closest(".acc-row");
+        const body = row.querySelector(".acc-body");
+        const isOpen = row.classList.contains("open");
+        if (isOpen) {
+          body.style.height = `${body.scrollHeight}px`;
+          requestAnimationFrame(() => {
+            body.style.height = "0px";
+          });
+          row.classList.remove("open");
+          trig.setAttribute("aria-expanded", "false");
+        } else {
+          row.classList.add("open");
+          trig.setAttribute("aria-expanded", "true");
+          body.style.height = `${body.scrollHeight}px`;
+          const onEnd = () => {
+            if (row.classList.contains("open")) body.style.height = "auto";
+            body.removeEventListener("transitionend", onEnd);
+          };
+          body.addEventListener("transitionend", onEnd);
+        }
+      });
+
+      // Bookmark & View in Room
+      function updateBookmarkIcon() {
+        const svg = document.querySelector("#bookmark-btn svg");
+        if (savedSet.has(activePdpIdx)) {
+          svg.setAttribute("fill", "currentColor");
+        } else {
+          svg.setAttribute("fill", "none");
+        }
+      }
+
+      document.getElementById("bookmark-btn").addEventListener("click", () => {
+        if (savedSet.has(activePdpIdx)) {
+          savedSet.delete(activePdpIdx);
+          showToast("Removed from saved prints");
+        } else {
+          savedSet.add(activePdpIdx);
+          showToast(`Saved "${PRINTS[activePdpIdx].title}"`);
+        }
+        updateBookmarkIcon();
+      });
+
+      document.getElementById("view-room-btn").addEventListener("click", () => {
+        returnToGallery(activePdpIdx);
+      });
+
+      // ---------------- BAG & DRAWER ----------------
+      function updateBagBadge() {
+        const count = bag.reduce((s, item) => s + item.qty, 0);
+        bagBadgeEl.textContent = String(count);
+        bagBadgeEl.classList.toggle("visible", count > 0);
+      }
+
+      function renderDrawer(enteringKey = null) {
+        drawerItemsEl.innerHTML = "";
+        document.getElementById("checkout-note").hidden = true;
+
+        if (bag.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "drawer-empty";
+          empty.textContent = "YOUR BAG IS EMPTY";
+          drawerItemsEl.appendChild(empty);
+          drawerSubtotalEl.textContent = formatPrice(0);
+          updateBagBadge();
+          return;
+        }
+
+        let subtotal = 0;
+        bag.forEach((item, index) => {
+          const p = PRINTS[item.printIdx];
+          subtotal += p.price * item.qty;
+
+          const row = document.createElement("div");
+          row.className = "bag-item";
+          if (enteringKey && item.key === enteringKey && !isReducedMotion()) {
+            row.classList.add("entering");
+            clearTimeout(bagEnterTimer);
+            bagEnterTimer = setTimeout(() => {
+              row.classList.remove("entering");
+            }, 750);
+          }
+
+          const thumb = document.createElement("div");
+          thumb.className = "bag-thumb";
+
+          const info = document.createElement("div");
+          info.className = "bag-item-info";
+
+          const title = document.createElement("div");
+          title.className = "bag-item-title";
+          title.textContent = p.title;
+
+          const artist = document.createElement("div");
+          artist.className = "bag-item-artist";
+          artist.textContent = p.artist;
+
+          const size = document.createElement("div");
+          size.className = "bag-item-size";
+          size.textContent = `${item.size} · ${item.frame}`;
+
+          const actions = document.createElement("div");
+          actions.className = "bag-item-actions";
+
+          const qty = document.createElement("div");
+          qty.className = "bag-qty";
+          const dec = document.createElement("button");
+          dec.type = "button";
+          dec.textContent = "−";
+          dec.ariaLabel = "Decrease item quantity";
+          dec.addEventListener("click", () => {
+            if (item.qty > 1) item.qty--;
+            else bag.splice(index, 1);
+            renderDrawer();
+          });
+
+          const qText = document.createElement("span");
+          qText.textContent = String(item.qty);
+
+          const inc = document.createElement("button");
+          inc.type = "button";
+          inc.textContent = "+";
+          inc.ariaLabel = "Increase item quantity";
+          inc.addEventListener("click", () => {
+            if (item.qty < 9) item.qty++;
+            renderDrawer();
+          });
+          qty.append(dec, qText, inc);
+
+          const trash = document.createElement("button");
+          trash.type = "button";
+          trash.className = "bag-trash";
+          trash.ariaLabel = "Remove item";
+          trash.innerHTML =
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+          trash.addEventListener("click", () => {
+            bag.splice(index, 1);
+            renderDrawer();
+          });
+
+          actions.append(qty, trash);
+          info.append(title, artist, size, actions);
+          row.append(thumb, info);
+          drawerItemsEl.appendChild(row);
+          registerCropEl(thumb, item.printIdx);
+        });
+
+        drawerSubtotalEl.textContent = formatPrice(subtotal);
+        updateBagBadge();
+      }
+
+      function openDrawer() {
+        drawerEl.classList.add("open");
+        drawerBackdropEl.classList.add("open");
+        requestAnimationFrame(updateAllDomCrops);
+      }
+
+      function closeDrawer() {
+        drawerEl.classList.remove("open");
+        drawerBackdropEl.classList.remove("open");
+      }
+
+      document.getElementById("add-bag-btn").addEventListener("click", () => {
+        const key = `${activePdpIdx}|${selectedOpts.paper}|${selectedOpts.size}|${selectedOpts.sig}|${selectedOpts.frame}`;
+        const existing = bag.find((it) => it.key === key);
+        if (existing) {
+          existing.qty = Math.min(9, existing.qty + pdpQty);
+        } else {
+          bag.push({
+            key,
+            printIdx: activePdpIdx,
+            size: selectedOpts.size,
+            frame: selectedOpts.frame,
+            qty: pdpQty,
+          });
+        }
+        renderDrawer(key);
+        openDrawer();
+      });
+
+      document.getElementById("bag-btn").addEventListener("click", () => {
+        renderDrawer();
+        openDrawer();
+      });
+      document.getElementById("drawer-close").addEventListener("click", closeDrawer);
+      drawerBackdropEl.addEventListener("click", closeDrawer);
+
+      document.getElementById("checkout-btn").addEventListener("click", () => {
+        const note = document.getElementById("checkout-note");
+        if (bag.length === 0) {
+          note.textContent = "Add a Citrus Season print to begin checkout.";
+          note.hidden = false;
+          return;
+        }
+        note.textContent = "Order summary prepared for Zestwell Studio. Thank you for collecting Citrus Season.";
+        note.hidden = false;
+      });
+
+      // Nav & Toggle routing
+      document.getElementById("nav-logo").addEventListener("click", (e) => {
+        e.preventDefault();
+        returnToGallery();
+      });
+      navIndexEl.addEventListener("click", (e) => {
+        e.preventDefault();
+        returnToGallery();
+      });
+      navShopEl.addEventListener("click", (e) => {
+        e.preventDefault();
+        openListView();
+      });
+      toggleGalleryBtn.addEventListener("click", () => returnToGallery());
+      toggleListBtn.addEventListener("click", () => openListView());
+      document.getElementById("enter-collection").addEventListener("click", (e) => {
+        e.preventDefault();
+        openListView();
+      });
+
+      document.getElementById("nav-info").addEventListener("click", (e) => {
+        e.preventDefault();
+        showToast("Citrus Season — Archival gouache editions, 2022–2024");
+      });
+      document.getElementById("nav-auctions").addEventListener("click", (e) => {
+        e.preventDefault();
+        showToast("Seasonal studio editions are available directly in Shop");
+      });
+      document.getElementById("nav-help").addEventListener("click", (e) => {
+        e.preventDefault();
+        showToast("Unframed prints ship rolled in 3–5 working days");
+      });
+      document.getElementById("account-btn").addEventListener("click", () => {
+        showToast("Collector guest session active");
+      });
+      document.getElementById("heart-btn").addEventListener("click", () => {
+        if (savedSet.size === 0) {
+          showToast("No saved prints yet — open a print to bookmark it");
+        } else {
+          const first = Array.from(savedSet)[0];
+          openPrintPage(first, null);
+        }
+      });
+
+      // Currency toggle
+      document.getElementById("currency-btn").addEventListener("click", () => {
+        const order = ["USD", "EUR", "GBP"];
+        currentCurrency = order[(order.indexOf(currentCurrency) + 1) % order.length];
+        document.getElementById("currency-label").textContent = currentCurrency;
+        document.querySelectorAll("[data-usd]").forEach((el) => {
+          el.textContent = formatPrice(Number(el.dataset.usd));
+        });
+        renderDrawer();
+      });
+
+      // Search modal
+      const searchModalEl = document.getElementById("search-modal");
+      const searchInputEl = document.getElementById("search-input");
+      const searchResultsEl = document.getElementById("search-results");
+
+      function renderSearchResults(q = "") {
+        const term = q.trim().toLowerCase();
+        searchResultsEl.innerHTML = "";
+        const matches = PRINTS.filter(
+          (p) =>
+            !term ||
+            p.title.toLowerCase().includes(term) ||
+            p.artist.toLowerCase().includes(term)
+        );
+        matches.forEach((p) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "search-row";
+          const thumb = document.createElement("div");
+          thumb.className = "search-thumb";
+          const txt = document.createElement("div");
+          txt.innerHTML = `<div style="font-size:14px;font-weight:500">${p.title}</div><div style="font-size:12px;font-style:italic;color:var(--ink-60)">${p.artist} · ${p.year}</div>`;
+          btn.append(thumb, txt);
+          btn.addEventListener("click", () => {
+            searchModalEl.classList.remove("open");
+            openPrintPage(p.id, thumb.getBoundingClientRect());
+          });
+          searchResultsEl.appendChild(btn);
+          registerCropEl(thumb, p.id);
+        });
+      }
+
+      function openSearchModal() {
+        searchModalEl.classList.add("open");
+        searchInputEl.value = "";
+        renderSearchResults("");
+        requestAnimationFrame(() => searchInputEl.focus());
+      }
+
+      document.getElementById("search-btn").addEventListener("click", openSearchModal);
+      document.getElementById("search-close").addEventListener("click", () =>
+        searchModalEl.classList.remove("open")
+      );
+      searchModalEl.addEventListener("click", (e) => {
+        if (e.target === searchModalEl) searchModalEl.classList.remove("open");
+      });
+      searchInputEl.addEventListener("input", () => renderSearchResults(searchInputEl.value));
+
+      // Resize
+      window.addEventListener("resize", () => {
+        D = getWalkOffset();
+        camera.fov = getFov();
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
+        updateAllDomCrops();
+        updateMobilePill();
+      });
+
+      // ---------------- RENDER LOOP ----------------
+      const easeOut2 = (t) => 1 - Math.pow(1 - t, 2);
+      const easeOut3 = (t) => 1 - Math.pow(1 - t, 3);
+      const easeOut4 = (t) => 1 - Math.pow(1 - t, 4);
+      const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+      const lerp = (a, b, t) => a + (b - a) * t;
+
+      let lastTime = performance.now();
+      applyPoseToCamera(pose);
+
+      function renderFrame(now) {
+        const dt = Math.min(0.1, Math.max(0, (now - lastTime) / 1000));
+        lastTime = now;
+
+        if (intro) {
+          const t = Math.min(1, (now - intro.start) / intro.duration);
+          const e = easeOutExpo(t);
+          pose.th = lerp(intro.from.th, intro.to.th, e);
+          pose.r = lerp(intro.from.r, intro.to.r, e);
+          pose.yaw = lerp(intro.from.yaw, intro.to.yaw, e);
+          pose.y = lerp(intro.from.y, intro.to.y, e);
+          pose.pitch = lerp(intro.from.pitch, intro.to.pitch, e);
+          if (t >= 1) intro = null;
+        } else if (glide) {
+          const t = Math.min(1, (now - glide.start) / glide.duration);
+          pose.th = lerp(glide.from.th, glide.to.th, easeOut4(t));
+          pose.yaw = lerp(glide.from.yaw, glide.to.yaw, easeOut2(t));
+          const e3 = easeOut3(t);
+          pose.r = lerp(glide.from.r, glide.to.r, e3);
+          pose.y = lerp(glide.from.y, glide.to.y, e3);
+          pose.pitch = lerp(glide.from.pitch, glide.to.pitch, e3);
+          targetTh = pose.th;
+          if (t >= 1) {
+            glide = null;
+            updateMobilePill();
+          }
+        } else if (!focusedMesh) {
+          if (isReducedMotion()) {
+            pose.th = targetTh;
+          } else {
+            pose.th += (targetTh - pose.th) * (1 - Math.exp(-dt / 0.36));
+          }
+        }
+
+        applyPoseToCamera(pose);
+        if (focusedMesh && glide) updateMobilePill();
+        renderer.render(scene, camera);
+
+        if (isSoftwareGl) {
+          const gl = renderer.getContext();
+          const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+          gl.flush();
+          const poll = () => {
+            const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
+            if (state === gl.UNSIGNALED) {
+              setTimeout(poll, 5);
+            } else {
+              if (sync) gl.deleteSync(sync);
+              setTimeout(() => requestAnimationFrame(renderFrame), 80);
+            }
+          };
+          setTimeout(poll, 5);
+        } else {
+          requestAnimationFrame(renderFrame);
+        }
+      }
+
+      requestAnimationFrame(renderFrame);
+      renderDrawer();
+    </script>
+  </body>
+</html>

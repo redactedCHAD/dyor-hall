@@ -1,0 +1,6 @@
+{
+  "name": "Zestwell — Citrus Season",
+  "description": "A first-person 3D curved gallery passage and print shop for Zestwell's Citrus Season collection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
